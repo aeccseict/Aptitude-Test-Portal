@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PediaTechWorld Test Platform</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Custom Styles & Overrides */
+        :root {
+            --primary-color: #6366f1; /* Indigo-500 */
+            --secondary-color: #f59e0b; /* Amber-500 */
+            --bg-color: #f8fafc; /* Slate-50 */
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            transition: background-color 0.3s ease;
+        }
+        /* Custom scrollbar for a nicer look */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-thumb { background-color: #9ca3af; border-radius: 10px; }
+        ::-webkit-scrollbar-track { background: #e5e7eb; }
+
+        /* Animation for card entry */
+        @keyframes slideInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-slide-in {
+            animation: slideInUp 0.5s ease-out;
+        }
+        
+        /* Custom button styling */
+        .btn-primary {
+            background-color: var(--primary-color);
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+        }
+        .btn-primary:hover {
+            background-color: #4f46e5; /* Indigo-600 */
+            transform: translateY(-1px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+        }
+        .btn-primary:active {
+            background-color: #4338ca; /* Indigo-700 */
+            transform: translateY(1px);
+            box-shadow: none;
+        }
+
+        /* Test option radio button styling */
+        .option-label {
+            transition: all 0.2s;
+            cursor: pointer;
+            border: 2px solid #e5e7eb;
+        }
+        .option-label:hover {
+            border-color: var(--primary-color);
+            background-color: #f0f1ff;
+        }
+        input[type="radio"]:checked + .option-label {
+            border-color: var(--primary-color);
+            background-color: #e0e7ff; /* Indigo-100 */
+        }
+
+        /* Utility for sticky elements */
+        .sticky-header {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            z-index: 100;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <header class="bg-white border-b sticky-header">
+        <div id="header-content" class="max-w-7xl mx-auto p-4 flex justify-between items-center">
+            <h1 class="text-2xl font-extrabold text-gray-900 tracking-tight">
+                <span class="text-indigo-600">Aptitude</span> Test Portal
+            </h1>
+            <button onclick="router('home')" id="home-button" class="text-sm font-semibold text-gray-500 hover:text-indigo-600 transition hidden">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-1" viewBox="0 0 20 20" fill="currentColor"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/></svg>
+                Home
+            </button>
+        </div>
+    </header>
+
+    <main id="app-container" class="flex-grow flex items-center justify-center p-4">
+        <!-- Content will be rendered here by JavaScript -->
+    </main>
+
+    <footer class="p-4 text-center text-gray-500 text-sm border-t mt-auto">
+        &copy; 2024 Secure Aptitude Test By Pedia Tech World.
+    </footer>
+
+    <!-- Global Modal for Alerts (replacing alert()) -->
+    <div id="global-modal" class="fixed inset-0 bg-gray-900 bg-opacity-70 flex items-center justify-center z-[1000] hidden">
+        <div class="bg-white rounded-xl shadow-2xl p-6 w-11/12 max-w-sm animate-slide-in">
+            <h3 id="modal-title" class="text-xl font-bold text-red-600 mb-2">Warning!</h3>
+            <p id="modal-message" class="text-gray-700 mb-4">A critical error occurred.</p>
+            <button onclick="document.getElementById('global-modal').classList.add('hidden')" class="w-full btn-primary text-white font-semibold py-2 rounded-lg">
+                I Understand
+            </button>
+        </div>
+    </div>
+
+<script>
+    // =========================================================================
+    // 1. GLOBAL STATE & INITIALIZATION
+    // =========================================================================
+
+    // Utility to show custom modal instead of alert()
+    function showAlert(title, message) {
+        // Reset button behavior to default
+        const modalButton = document.getElementById('global-modal').querySelector('button');
+        modalButton.textContent = 'I Understand';
+        // Reset style classes in case it was used for confirmation
+        modalButton.classList.remove('bg-red-500', 'hover:bg-red-600');
+        modalButton.classList.add('btn-primary');
+        modalButton.onclick = () => document.getElementById('global-modal').classList.add('hidden');
+
+        // Update modal content and show
+        document.getElementById('modal-title').textContent = title;
+        document.getElementById('modal-message').textContent = message;
+        document.getElementById('global-modal').classList.remove('hidden');
+
+        // Adjust title color based on type
+        document.getElementById('modal-title').classList.remove('text-indigo-600', 'text-green-600');
+        if (title.includes('Success')) {
+            document.getElementById('modal-title').classList.add('text-green-600');
+        } else if (title.includes('Confirm') || title.includes('Enrollment') || title.includes('Password')) {
+            document.getElementById('modal-title').classList.add('text-indigo-600');
+        } else {
+            document.getElementById('modal-title').classList.add('text-red-600');
+        }
+    }
+
+    // Default configuration and state
+    const LOCAL_STORAGE_KEY_Q = 'aptitude_questions';
+    const LOCAL_STORAGE_KEY_R = 'aptitude_user_results';
+    const ADMIN_PASSWORD_KEY = 'admin_password';
+
+    let state = {
+        currentView: 'home',
+        questions: [],
+        userResults: [],
+        currentAttempt: null,
+        timer: null,
+        timeRemaining: 0, // seconds
+        testDurationMinutes: 10,
+        isAdminLoggedIn: false,
+    };
+
+    // Default Questions (if localStorage is empty)
+    const defaultQuestions = [
+        { id: 1, question: "If 5 workers can build 5 houses in 5 days, how many days will 1 worker take to build 1 house?", options: ["1 day", "5 days", "25 days", "10 days"], correctAnswer: "5 days", type: "mcq" },
+        { id: 2, question: "Which number comes next in the sequence: 1, 1, 2, 3, 5, 8, ___?", options: ["11", "12", "13", "14"], correctAnswer: "13", type: "mcq" },
+        { id: 3, question: "A train running at 72 km/hr crosses a pole in 10 seconds. What is the length of the train in meters? (Formula: Distance = Speed * Time)", options: ["100m", "150m", "200m", "250m"], correctAnswer: "200m", type: "mcq" },
+        { id: 4, question: "Find the odd one out: Car, Bus, Bicycle, Ship.", options: ["Car", "Bus", "Bicycle", "Ship"], correctAnswer: "Ship", type: "mcq" },
+        { id: 5, question: "What is 15% of 300?", options: ["30", "45", "50", "60"], correctAnswer: "45", type: "mcq" },
+        { id: 6, question: "If 'BAT' is coded as 2120, how is 'CAT' coded?", options: ["3120", "2130", "3121", "1320"], correctAnswer: "3120", type: "mcq" },
+        { id: 7, question: "How many months have 28 days?", options: ["1", "2", "6", "12"], correctAnswer: "12", type: "mcq" },
+    ];
+
+    // =========================================================================
+    // 2. LOCAL STORAGE (Data Persistence)
+    // =========================================================================
+
+    function loadData() {
+        try {
+            const storedQ = localStorage.getItem(LOCAL_STORAGE_KEY_Q);
+            const storedR = localStorage.getItem(LOCAL_STORAGE_KEY_R);
+
+            state.questions = storedQ ? JSON.parse(storedQ) : defaultQuestions;
+            state.userResults = storedR ? JSON.parse(storedR) : [];
+
+            // Initialize admin password if it doesn't exist
+            if (!localStorage.getItem(ADMIN_PASSWORD_KEY)) {
+                localStorage.setItem(ADMIN_PASSWORD_KEY, 'admin123'); // Default password
+            }
+        } catch (e) {
+            console.error("Error loading data from localStorage:", e);
+            showAlert("Data Error", "Could not load application data. Using default settings.");
+            state.questions = defaultQuestions;
+            state.userResults = [];
+        }
+    }
+
+    function saveQuestions() {
+        localStorage.setItem(LOCAL_STORAGE_KEY_Q, JSON.stringify(state.questions));
+    }
+
+    function saveResults() {
+        localStorage.setItem(LOCAL_STORAGE_KEY_R, JSON.stringify(state.userResults));
+    }
+
+    // =========================================================================
+    // 3. ANTI-MALPRACTICE (Security Measures)
+    // =========================================================================
+
+    function blockHotkeys(event) {
+        // Block all function keys (F1-F12)
+        if (event.key.startsWith("F") && event.key.length <= 3) {
+            event.preventDefault();
+            showAlert("Security Alert", "Function keys are disabled during the test.");
+            return;
+        }
+
+        // Block Ctrl/Cmd combinations
+        if (event.ctrlKey || event.metaKey) {
+            switch (event.key) {
+                case 'c': // Copy
+                case 'C':
+                case 'v': // Paste
+                case 'V':
+                case 'x': // Cut
+                case 'X':
+                case 'a': // Select All
+                case 'A':
+                case 'r': // Reload
+                case 'R':
+                case 'w': // Close Tab
+                case 'W':
+                case 't': // New Tab
+                case 'T':
+                case 's': // Save Page
+                case 'S':
+                case 'n': // New Window
+                case 'N':
+                    event.preventDefault();
+                    showAlert("Security Alert", "The hotkey for '" + event.key.toUpperCase() + "' is disabled to prevent malpractice.");
+                    return;
+            }
+        }
+
+        // Block specific keys
+        if (event.key === 'Tab' || event.key === 'Escape' || event.key === 'PrintScreen') {
+            event.preventDefault();
+            if (event.key === 'Tab' && event.altKey) { // Simulated Alt+Tab block
+                 // Alt+Tab cannot be fully blocked, but we disable Tab and rely on visibilitychange
+            }
+            showAlert("Security Alert", `The ${event.key} key is disabled.`);
+        }
+    }
+
+    function handleVisibilityChange() {
+        if (state.currentView === 'test' && document.hidden) {
+            // Test is running, but user switched tabs/minimized window/clicked out
+            clearInterval(state.timer);
+            const finalScore = calculateScore();
+            state.currentAttempt.score = finalScore;
+            state.currentAttempt.malpracticeFlag = true;
+            state.currentAttempt.attemptDuration = formatTime(state.testDurationMinutes * 60 - state.timeRemaining);
+            saveAttempt();
+            showAlert("Malpractice Detected", "You switched tabs or left the test window. The test has been automatically submitted and flagged.");
+            router('result');
+        }
+    }
+
+    function disableContextMenu(event) {
+        event.preventDefault();
+    }
+
+    function applySecurityMeasures() {
+        if (state.currentView === 'test') {
+            // 1. Block Hotkeys
+            document.addEventListener('keydown', blockHotkeys);
+            // 2. Block Right Click / Context Menu
+            document.addEventListener('contextmenu', disableContextMenu);
+            // 3. Monitor Visibility (Tab Switching / Minimizing)
+            document.addEventListener('visibilitychange', handleVisibilityChange);
+            // 4. Request Fullscreen (Best effort)
+            const appContainer = document.documentElement;
+            if (appContainer.requestFullscreen) {
+                appContainer.requestFullscreen().catch(err => {
+                    console.warn("Fullscreen request denied or failed:", err);
+                    // Do not block the test if fullscreen fails, but warn the user.
+                });
+            }
+        } else {
+            // Remove all security listeners when not in test
+            document.removeEventListener('keydown', blockHotkeys);
+            document.removeEventListener('contextmenu', disableContextMenu);
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+            // Exit fullscreen if needed
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+            }
+        }
+    }
+
+
+    // =========================================================================
+    // 4. APPLICATION ROUTER & RENDERER
+    // =========================================================================
+
+    function router(view, data = null) {
+        state.currentView = view;
+        const app = document.getElementById('app-container');
+        app.innerHTML = '';
+        document.getElementById('home-button').classList.toggle('hidden', view === 'home' || view === 'test');
+
+        // Apply or remove security listeners based on view
+        applySecurityMeasures();
+
+        // Add a slide-in animation to the main content container
+        app.className = 'flex-grow flex items-center justify-center p-4 animate-slide-in';
+        setTimeout(() => app.classList.remove('animate-slide-in'), 500); // Remove class after animation
+
+        clearInterval(state.timer); // Clear timer on navigation
+
+        switch (view) {
+            case 'home':
+                renderHome();
+                break;
+            case 'user_details':
+                renderUserDetailsForm();
+                break;
+            case 'test':
+                renderTest();
+                break;
+            case 'result':
+                renderResult();
+                break;
+            case 'admin_login':
+                renderAdminLogin();
+                break;
+            case 'admin_panel':
+                renderAdminPanel();
+                break;
+            case 'admin_questions':
+                renderAdminQuestions();
+                break;
+            case 'admin_user_management':
+                renderAdminUserManagement();
+                break;
+            case 'admin_change_password':
+                renderAdminChangePassword();
+                break;
+            default:
+                renderHome();
+        }
+    }
+
+    // =========================================================================
+    // 5. USER PHASE (Home, Details, Test, Result)
+    // =========================================================================
+
+    function renderHome() {
+        const app = document.getElementById('app-container');
+        app.innerHTML = `
+            <div class="bg-white p-8 md:p-12 rounded-2xl shadow-xl w-full max-w-2xl text-center">
+                <h2 class="text-3xl md:text-4xl font-extrabold text-gray-800 mb-4">Welcome to the Aptitude Test</h2>
+                <p class="text-gray-600 mb-8 text-lg">Test your skills. This exam is time-bound and strictly monitored against malpractice.</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="p-6 bg-indigo-50 border border-indigo-200 rounded-xl shadow-lg hover:shadow-xl transition duration-300">
+                        <h3 class="text-xl font-bold text-indigo-700 mb-3">User Mode</h3>
+                        <p class="text-indigo-600 mb-4">Start your timed aptitude test now.</p>
+                        <button onclick="router('user_details')" class="w-full btn-primary text-white font-semibold py-3 rounded-lg text-lg">
+                            Start Test
+                        </button>
+                    </div>
+                    
+                    <div class="p-6 bg-amber-50 border border-amber-200 rounded-xl shadow-lg hover:shadow-xl transition duration-300">
+                        <h3 class="text-xl font-bold text-amber-700 mb-3">Admin Mode</h3>
+                        <p class="text-amber-600 mb-4">Access panel to manage questions and results.</p>
+                        <button onclick="router('admin_login')" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-semibold py-3 rounded-lg text-lg transition duration-200">
+                            Admin Login
+                        </button>
+                    </div>
+                </div>
+
+                <div class="mt-8 p-4 bg-red-100 text-red-700 rounded-lg text-sm font-medium">
+                    <p class="font-bold mb-1">IMPORTANT SECURITY NOTE:</p>
+                    <ul class="list-disc list-inside text-left mx-auto max-w-xs">
+                        <li>Test is submitted if you switch tabs/windows.</li>
+                        <li>Copy/Paste/Right-Click are disabled.</li>
+                        <li>The time limit is ${state.testDurationMinutes} minutes.</li>
+                    </ul>
+                </div>
+            </div>
+        `;
+    }
+
+    function renderUserDetailsForm() {
+        const app = document.getElementById('app-container');
+        app.innerHTML = `
+            <div class="bg-white p-8 md:p-10 rounded-2xl shadow-xl w-full max-w-lg">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6 border-b pb-2 text-indigo-600">Enter Your Details (Required)</h2>
+                <form id="user-details-form" class="space-y-4">
+                    <!-- PERSONAL DETAILS -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
+                            <input type="text" id="name" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g., Jane Doe">
+                        </div>
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address *</label>
+                            <input type="email" id="email" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g., jane.doe@company.com">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number (Optional)</label>
+                        <input type="tel" id="phone" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g., 9876543210">
+                    </div>
+
+                    <h3 class="text-xl font-bold text-gray-800 pt-4 border-t mt-4">Academic Details</h3>
+                    
+                    <!-- ACADEMIC DETAILS -->
+                    <div>
+                        <label for="collegeName" class="block text-sm font-medium text-gray-700 mb-1">College Name *</label>
+                        <input type="text" id="collegeName" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g., State University of Technology">
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="location" class="block text-sm font-medium text-gray-700 mb-1">Location (City, State) *</label>
+                            <input type="text" id="location" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g., New Delhi, India">
+                        </div>
+                        <div>
+                            <label for="yearPassedOut" class="block text-sm font-medium text-gray-700 mb-1">Year of Passed Out *</label>
+                            <input type="number" id="yearPassedOut" required min="1950" max="${new Date().getFullYear() + 4}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g., 2024">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full btn-primary text-white font-semibold py-3 rounded-lg text-lg mt-6">
+                        Proceed to Test
+                    </button>
+                </form>
+            </div>
+        `;
+
+        document.getElementById('user-details-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            
+            // NEW FIELDS CAPTURE
+            const collegeName = document.getElementById('collegeName').value.trim();
+            const location = document.getElementById('location').value.trim();
+            const yearPassedOut = document.getElementById('yearPassedOut').value.trim();
+            
+            // Validate ALL required fields
+            if (!name || !email || !collegeName || !location || !yearPassedOut) {
+                showAlert("Input Required", "Please fill in all required fields (marked with *) to start the test.");
+                return;
+            }
+
+            // 1. **ENFORCEMENT: Check for existing enrollment (Name + Email)**
+            const existingUser = state.userResults.find(r => 
+                r.name.toLowerCase() === name.toLowerCase() && 
+                r.email.toLowerCase() === email.toLowerCase()
+            );
+
+            if (existingUser) {
+                showAlert("Enrollment Conflict", "You have already completed this aptitude test. Users are only permitted one attempt per enrollment.");
+                document.getElementById('user-details-form').reset();
+                return;
+            }
+            // END ENFORCEMENT
+
+            // Initialize the current test attempt state with ALL data
+            state.currentAttempt = {
+                id: crypto.randomUUID(),
+                name: name,
+                email: email,
+                phone: phone,
+                collegeName: collegeName, 
+                location: location,       
+                yearPassedOut: yearPassedOut, 
+                score: 0,
+                totalQuestions: state.questions.length,
+                date: new Date().toISOString(),
+                answers: {}, // { questionId: selectedOption }
+                malpracticeFlag: false,
+                attemptDuration: null
+            };
+
+            state.timeRemaining = state.testDurationMinutes * 60;
+            router('test');
+        });
+    }
+
+    function startTimer() {
+        const timerElement = document.getElementById('test-timer');
+        if (!timerElement) return;
+
+        state.timer = setInterval(() => {
+            state.timeRemaining--;
+            timerElement.textContent = formatTime(state.timeRemaining);
+
+            if (state.timeRemaining <= 60) {
+                timerElement.classList.add('text-red-500', 'font-bold');
+            }
+
+            if (state.timeRemaining <= 0) {
+                clearInterval(state.timer);
+                submitTest();
+            }
+        }, 1000);
+    }
+
+    function formatTime(seconds) {
+        const min = Math.floor(seconds / 60);
+        const sec = seconds % 60;
+        return `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+    }
+
+    function renderTest() {
+        if (!state.currentAttempt || state.questions.length === 0) {
+            showAlert("Error", "Test configuration error or no questions available. Returning to home.");
+            return router('home');
+        }
+
+        const app = document.getElementById('app-container');
+        app.classList.remove('items-center'); // Allow content to fill vertical space
+        app.innerHTML = `
+            <div class="w-full max-w-4xl p-0">
+                <!-- Sticky Header/Timer -->
+                <div class="sticky top-0 bg-white p-4 rounded-b-xl mb-6 flex justify-between items-center sticky-header">
+                    <div class="text-gray-700 font-semibold">Time Remaining:</div>
+                    <div id="test-timer" class="text-2xl font-extrabold text-indigo-600">
+                        ${formatTime(state.timeRemaining)}
+                    </div>
+                </div>
+
+                <!-- Test Form -->
+                <form id="aptitude-test-form" class="space-y-8 p-4">
+                    ${state.questions.map((q, index) => `
+                        <div class="question-card bg-white p-6 rounded-xl shadow-lg border-t-4 border-indigo-500">
+                            <p class="text-lg font-semibold text-gray-600 mb-2">Question ${index + 1} of ${state.questions.length}</p>
+                            <h3 class="text-xl font-bold text-gray-900 mb-4">${q.question}</h3>
+                            <div class="space-y-3">
+                                ${q.options.map((option, optIndex) => `
+                                    <div class="flex items-center">
+                                        <input type="radio" id="q${q.id}-opt${optIndex}" name="q-${q.id}" value="${option}"
+                                            class="hidden peer"
+                                            onchange="handleAnswerChange(${q.id}, '${option}')"
+                                        >
+                                        <label for="q${q.id}-opt${optIndex}" class="option-label flex-grow px-5 py-3 rounded-lg text-gray-800 peer-checked:bg-indigo-100 transition duration-150">
+                                            ${option}
+                                        </label>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `).join('')}
+                    
+                    <button type="button" onclick="confirmSubmission()" class="w-full btn-primary text-white font-semibold py-4 rounded-lg text-xl mt-10">
+                        Submit Test
+                    </button>
+                </form>
+            </div>
+        `;
+        startTimer();
+    }
+
+    function handleAnswerChange(questionId, selectedOption) {
+        state.currentAttempt.answers[questionId] = selectedOption;
+    }
+
+    function confirmSubmission() {
+        showAlert('Confirm Submission', 'Are you sure you want to submit the test? You cannot return after submitting.');
+        
+        // Temporarily override the modal button for submission confirmation
+        const modalButton = document.getElementById('global-modal').querySelector('button');
+        modalButton.textContent = 'Confirm Submit';
+        modalButton.onclick = () => {
+            document.getElementById('global-modal').classList.add('hidden');
+            // Revert button to default behavior
+            modalButton.textContent = 'I Understand';
+            modalButton.onclick = () => document.getElementById('global-modal').classList.add('hidden');
+            submitTest();
+        };
+    }
+
+    function calculateScore() {
+        let score = 0;
+        state.questions.forEach(q => {
+            const userAnswer = state.currentAttempt.answers[q.id];
+            if (userAnswer === q.correctAnswer) {
+                score++;
+            }
+        });
+        return score;
+    }
+
+    function saveAttempt() {
+        // Calculate score and final metrics
+        const score = calculateScore();
+        const duration = state.testDurationMinutes * 60 - state.timeRemaining;
+
+        state.currentAttempt.score = score;
+        state.currentAttempt.percentage = (score / state.currentAttempt.totalQuestions) * 100;
+
+        // If not flagged (already set during visibilitychange), record duration
+        if (!state.currentAttempt.malpracticeFlag) {
+            state.currentAttempt.attemptDuration = formatTime(duration);
+        }
+
+        // Add to results and save
+        state.userResults.push(state.currentAttempt);
+        saveResults();
+
+        router('result');
+    }
+    
+    function submitTest() {
+        clearInterval(state.timer);
+        // Record final time remaining as 0 for time-out submissions
+        if (state.timeRemaining < 0) state.timeRemaining = 0;
+        saveAttempt();
+    }
+
+    function renderResult() {
+        const attempt = state.currentAttempt;
+        const app = document.getElementById('app-container');
+
+        if (!attempt) {
+            return router('home');
+        }
+
+        const scoreColor = attempt.percentage >= 70 ? 'text-green-600' : attempt.percentage >= 50 ? 'text-amber-600' : 'text-red-600';
+        const flagMessage = attempt.malpracticeFlag
+            ? '<p class="text-red-600 font-bold mt-2">❗ Malpractice Flagged: Test submitted automatically due to tab switching/hotkey use.</p>'
+            : '<p class="text-green-600 font-bold mt-2">✅ Test completed successfully within the time limit.</p>';
+
+        app.innerHTML = `
+            <div class="bg-white p-8 md:p-12 rounded-2xl shadow-xl w-full max-w-2xl text-center">
+                <div class="mb-6">
+                    <svg class="mx-auto h-16 w-16 ${scoreColor.replace('text-', 'bg-').replace('-600', '-100')} ${scoreColor} rounded-full p-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <h2 class="text-4xl font-extrabold text-gray-800 mt-4">Test Submitted!</h2>
+                </div>
+
+                <div class="space-y-4 text-left p-6 bg-gray-50 rounded-xl mb-8 border border-gray-200">
+                    <p class="text-xl font-bold text-gray-700 border-b pb-2">Results for ${attempt.name}</p>
+                    <div class="flex justify-between items-center text-lg">
+                        <span class="font-medium text-gray-600">Score:</span>
+                        <span class="font-extrabold ${scoreColor}">${attempt.score} / ${attempt.totalQuestions}</span>
+                    </div>
+                    <div class="flex justify-between items-center text-lg">
+                        <span class="font-medium text-gray-600">Percentage:</span>
+                        <span class="font-extrabold ${attempt.percentage ? scoreColor : 'text-gray-500'}">${attempt.percentage ? attempt.percentage.toFixed(1) : 0}%</span>
+                    </div>
+                    <div class="flex justify-between items-center text-base">
+                        <span class="font-medium text-gray-600">Time Taken:</span>
+                        <span class="font-semibold text-gray-800">${attempt.attemptDuration || 'N/A'}</span>
+                    </div>
+                    ${flagMessage}
+                </div>
+
+                <button onclick="router('home')" class="btn-primary text-white font-semibold py-3 px-8 rounded-lg text-lg">
+                    Go to Home
+                </button>
+            </div>
+        `;
+        // Clear current attempt data after rendering result
+        state.currentAttempt = null;
+    }
+
+
+    // =========================================================================
+    // 6. ADMIN PHASE (Login, Panel, Management)
+    // =========================================================================
+
+    function renderAdminLogin() {
+        if (state.isAdminLoggedIn) {
+            return router('admin_panel');
+        }
+        const app = document.getElementById('app-container');
+        app.innerHTML = `
+            <div class="bg-white p-8 md:p-10 rounded-2xl shadow-xl w-full max-w-md">
+                <h2 class="text-3xl font-bold text-amber-600 mb-6 border-b pb-2">Admin Login</h2>
+                <form id="admin-login-form" class="space-y-4">
+                    <div>
+                        <label for="admin-password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                        <input type="password" id="admin-password" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-amber-500 focus:border-amber-500" placeholder="Enter Admin Password">
+                        <p class="text-xs text-gray-500 mt-1">Default Password: admin123</p>
+                    </div>
+                    <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-semibold py-3 rounded-lg text-lg mt-6 transition duration-200">
+                        Login
+                    </button>
+                </form>
+            </div>
+        `;
+
+        document.getElementById('admin-login-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const password = document.getElementById('admin-password').value;
+            const storedPassword = localStorage.getItem(ADMIN_PASSWORD_KEY);
+
+            if (password === storedPassword) {
+                state.isAdminLoggedIn = true;
+                router('admin_panel');
+            } else {
+                showAlert("Access Denied", "Incorrect Admin Password.");
+            }
+        });
+    }
+
+    function renderAdminPanel() {
+        if (!state.isAdminLoggedIn) {
+            return router('admin_login');
+        }
+        const app = document.getElementById('app-container');
+        app.classList.remove('items-center');
+        
+        const flaggedCount = state.userResults.filter(r => r.malpracticeFlag).length;
+        const totalUsers = state.userResults.length;
+
+        app.innerHTML = `
+            <div class="w-full max-w-7xl mx-auto p-4 md:p-8 space-y-8">
+                <h2 class="text-3xl font-bold text-gray-800 border-b pb-4 text-amber-600">Admin Panel Dashboard</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="p-6 bg-indigo-50 border-l-4 border-indigo-500 rounded-xl shadow-md">
+                        <p class="text-sm font-medium text-indigo-500">Total Users Tested</p>
+                        <p class="text-3xl font-extrabold text-gray-900">${totalUsers}</p>
+                    </div>
+                    <div class="p-6 bg-green-50 border-l-4 border-green-500 rounded-xl shadow-md">
+                        <p class="text-sm font-medium text-green-500">Total Questions</p>
+                        <p class="text-3xl font-extrabold text-gray-900">${state.questions.length}</p>
+                    </div>
+                    <div class="p-6 bg-red-50 border-l-4 border-red-500 rounded-xl shadow-md">
+                        <p class="text-sm font-medium text-red-500">Malpractice Flags</p>
+                        <p class="text-3xl font-extrabold text-gray-900">${flaggedCount}</p>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 border-b pb-3">
+                        <h3 class="text-xl font-bold text-gray-800">Admin Actions</h3>
+                        <div class="space-y-2 sm:space-y-0 sm:space-x-2 mt-3 sm:mt-0">
+                            <button onclick="router('admin_user_management')" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg text-sm transition">
+                                Manage User Records
+                            </button>
+                            <button onclick="router('admin_questions')" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg text-sm transition">
+                                Manage Questions
+                            </button>
+                            <!-- NEW BUTTON: Change Password -->
+                            <button onclick="router('admin_change_password')" class="w-full sm:w-auto bg-yellow-600 hover:bg-yellow-700 text-white font-semibold py-2 px-4 rounded-lg text-sm transition">
+                                Change Admin Password
+                            </button>
+                            <button onclick="exportToCsv()" class="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg text-sm transition">
+                                Export Results (CSV)
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="p-4 bg-gray-50 rounded-lg">
+                        <p class="text-gray-700">Welcome to Pedia Tech World Admin Panel.</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    /**
+     * Renders the form for changing the admin password.
+     */
+    function renderAdminChangePassword() {
+        if (!state.isAdminLoggedIn) {
+            return router('admin_login');
+        }
+        const app = document.getElementById('app-container');
+        app.innerHTML = `
+            <div class="bg-white p-8 md:p-10 rounded-2xl shadow-xl w-full max-w-md">
+                <h2 class="text-3xl font-bold text-amber-600 mb-6 border-b pb-2">Change Admin Password</h2>
+                <form id="change-password-form" class="space-y-4">
+                    <div>
+                        <label for="current-password" class="block text-sm font-medium text-gray-700 mb-1">Current Password *</label>
+                        <input type="password" id="current-password" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-amber-500 focus:border-amber-500">
+                    </div>
+                    <div>
+                        <label for="new-password" class="block text-sm font-medium text-gray-700 mb-1">New Password *</label>
+                        <input type="password" id="new-password" required minlength="6" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-amber-500 focus:border-amber-500">
+                        <p class="text-xs text-gray-500 mt-1">Must be at least 6 characters long.</p>
+                    </div>
+                    <div>
+                        <label for="confirm-password" class="block text-sm font-medium text-gray-700 mb-1">Confirm New Password *</label>
+                        <input type="password" id="confirm-password" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-amber-500 focus:border-amber-500">
+                    </div>
+                    <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-semibold py-3 rounded-lg text-lg mt-6 transition duration-200">
+                        Update Password
+                    </button>
+                    <button type="button" onclick="router('admin_panel')" class="w-full bg-gray-400 hover:bg-gray-500 text-white font-semibold py-3 rounded-lg text-lg transition duration-200">
+                        Cancel
+                    </button>
+                </form>
+            </div>
+        `;
+
+        document.getElementById('change-password-form').addEventListener('submit', handleChangeAdminPassword);
+    }
+
+    /**
+     * Handles the form submission for changing the admin password.
+     */
+    function handleChangeAdminPassword(e) {
+        e.preventDefault();
+        
+        const currentPassword = document.getElementById('current-password').value;
+        const newPassword = document.getElementById('new-password').value;
+        const confirmPassword = document.getElementById('confirm-password').value;
+        const storedPassword = localStorage.getItem(ADMIN_PASSWORD_KEY);
+
+        if (currentPassword !== storedPassword) {
+            return showAlert("Error", "The Current Password you entered is incorrect.");
+        }
+
+        if (newPassword.length < 6) {
+             return showAlert("Error", "New password must be at least 6 characters long.");
+        }
+
+        if (newPassword !== confirmPassword) {
+            return showAlert("Error", "New Password and Confirm New Password do not match.");
+        }
+        
+        if (newPassword === currentPassword) {
+             return showAlert("Error", "New password must be different from the current password.");
+        }
+
+        localStorage.setItem(ADMIN_PASSWORD_KEY, newPassword);
+        
+        showAlert("Success", "Admin password has been successfully updated!");
+        router('admin_panel');
+    }
+
+    /**
+     * Deletes a specific user record from the results array.
+     * @param {string} id The unique ID of the result record to delete.
+     */
+    function deleteUserRecord(id) {
+        // Use custom modal for confirmation (replacing confirm())
+        const confirmTitle = 'Confirm Deletion';
+        const confirmMessage = 'Are you absolutely sure you want to permanently delete this user\'s record? This action cannot be undone.';
+        
+        showAlert(confirmTitle, confirmMessage);
+        
+        const modalButton = document.getElementById('global-modal').querySelector('button');
+        modalButton.textContent = 'Permanently Delete';
+        modalButton.classList.add('bg-red-500', 'hover:bg-red-600');
+        modalButton.classList.remove('btn-primary');
+        
+        modalButton.onclick = () => {
+            document.getElementById('global-modal').classList.add('hidden');
+            
+            state.userResults = state.userResults.filter(r => r.id !== id);
+            saveResults();
+            showAlert("Success", "User record deleted successfully.");
+            renderAdminUserManagement(); 
+            
+            // Restore button classes
+            modalButton.classList.remove('bg-red-500', 'hover:bg-red-600');
+            modalButton.classList.add('btn-primary');
+            modalButton.textContent = 'I Understand';
+            modalButton.onclick = () => document.getElementById('global-modal').classList.add('hidden');
+        };
+    }
+
+    function renderAdminUserManagement() {
+        if (!state.isAdminLoggedIn) {
+            return router('admin_login');
+        }
+        const app = document.getElementById('app-container');
+        app.classList.remove('items-center');
+
+        const resultsHtml = state.userResults.length > 0 ? state.userResults.map((r, index) => {
+            const scoreColor = r.percentage >= 70 ? 'text-green-600' : r.percentage >= 50 ? 'text-amber-600' : 'text-red-600';
+            const flagClass = r.malpracticeFlag ? 'bg-red-50 border-l-4 border-red-300' : 'bg-white';
+            return `
+                <tr class="border-b transition duration-150 hover:bg-gray-100 ${flagClass}">
+                    <td class="px-3 py-3 whitespace-nowrap text-sm font-medium text-gray-900">${index + 1}</td>
+                    <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-800">${r.name}</td>
+                    <td class="px-3 py-3 whitespace-nowrap text-xs text-gray-500">${r.email}</td>
+                    <td class="px-3 py-3 whitespace-nowrap text-xs text-gray-500">${r.phone || 'N/A'}</td> <!-- ADDED PHONE -->
+                    <td class="px-3 py-3 whitespace-nowrap text-xs text-gray-500">${r.collegeName || 'N/A'}</td>
+                    <td class="px-3 py-3 whitespace-nowrap text-xs text-gray-500">${r.location || 'N/A'}</td>
+                    <td class="px-3 py-3 whitespace-nowrap text-xs text-gray-500">${r.yearPassedOut || 'N/A'}</td>
+                    <td class="px-3 py-3 whitespace-nowrap text-sm font-bold ${scoreColor}">
+                        ${r.score} / ${r.totalQuestions}
+                    </td>
+                    <td class="px-3 py-3 whitespace-nowrap text-xs text-gray-500">${r.attemptDuration || 'Timed Out'}</td>
+                    <td class="px-3 py-3 whitespace-nowrap text-sm font-bold text-center">
+                        ${r.malpracticeFlag ? '<span class="text-red-500">YES</span>' : '<span class="text-green-500">No</span>'}
+                    </td>
+                    <td class="px-3 py-3 whitespace-nowrap text-right text-sm font-medium">
+                        <button onclick="deleteUserRecord('${r.id}')" class="text-red-600 hover:text-red-900 transition duration-150 p-2 rounded-lg bg-red-100">Delete</button>
+                    </td>
+                </tr>
+            `;
+        }).join('') : `<tr><td colspan="11" class="text-center py-8 text-gray-500">No user records found.</td></tr>`;
+
+        app.innerHTML = `
+            <div class="w-full max-w-7xl mx-auto p-4 md:p-8 space-y-6">
+                <h2 class="text-3xl font-bold text-gray-800 border-b pb-4 text-indigo-600">User Records Management</h2>
+                
+                <div class="flex justify-between items-center space-x-2">
+                    <p class="text-gray-600">Total Attempts: ${state.userResults.length}</p>
+                    <button onclick="router('admin_panel')" class="bg-amber-500 hover:bg-amber-600 text-white font-semibold py-2 px-4 rounded-lg text-sm transition">
+                        Back to Dashboard
+                    </button>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">User Attempts List</h3>
+                    
+                    <!-- Results Table -->
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead>
+                                <tr class="bg-gray-100">
+                                    <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
+                                    <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                    <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                    <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th> <!-- ADDED PHONE -->
+                                    <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">College</th>
+                                    <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
+                                    <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Grad Year</th>
+                                    <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Score</th>
+                                    <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th>
+                                    <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Flag</th>
+                                    <th class="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                ${resultsHtml}
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+        `;
+    }
+
+    function exportToCsv() {
+        if (state.userResults.length === 0) {
+            return showAlert("Export Failed", "No user data found to export.");
+        }
+
+        // UPDATED HEADERS
+        const headers = ["ID", "Name", "Email", "Phone", "College Name", "Location", "Year Passed Out", "Score", "Total Questions", "Percentage", "Date", "Duration", "Malpractice Flag"];
+        
+        // Include individual answers as headers (dynamic)
+        const allQuestionIds = state.questions.map(q => `Q${q.id}`);
+        const finalHeaders = [...headers, ...allQuestionIds];
+
+        let csv = finalHeaders.join(',') + '\n';
+
+        state.userResults.forEach(r => {
+            const escapeCsv = (text) => `"${String(text).replace(/"/g, '""')}"`;
+
+            // UPDATED DATA
+            const data = [
+                r.id,
+                escapeCsv(r.name),
+                escapeCsv(r.email),
+                escapeCsv(r.phone), // Ensure phone is exported
+                escapeCsv(r.collegeName), 
+                escapeCsv(r.location),       
+                r.yearPassedOut, 
+                r.score,
+                r.totalQuestions,
+                r.percentage ? r.percentage.toFixed(1) + '%' : '0%',
+                new Date(r.date).toLocaleString(),
+                r.attemptDuration || 'N/A',
+                r.malpracticeFlag ? 'YES' : 'NO'
+            ];
+
+            // Add answers dynamically
+            const answers = state.questions.map(q => {
+                const answer = r.answers[q.id] || 'N/A';
+                return escapeCsv(answer);
+            });
+
+            csv += [...data, ...answers].join(',') + '\n';
+        });
+
+        // Create a Blob and trigger download
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        
+        link.setAttribute("href", url);
+        link.setAttribute("download", `aptitude_results_${new Date().toISOString().slice(0, 10)}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        showAlert("Export Complete", "User results have been downloaded as a CSV file.");
+    }
+
+    function renderAdminQuestions() {
+        if (!state.isAdminLoggedIn) {
+            return router('admin_login');
+        }
+
+        const app = document.getElementById('app-container');
+        app.classList.remove('items-center');
+        
+        const questionsHtml = state.questions.map((q, index) => `
+            <div class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-indigo-500">
+                <div class="flex justify-between items-start mb-2">
+                    <p class="text-lg font-bold text-gray-800">Q${index + 1}: ${q.question}</p>
+                    <button onclick="deleteQuestion(${q.id})" class="text-red-600 hover:text-red-800 font-semibold transition text-sm p-2 bg-red-100 rounded-lg">Delete</button>
+                </div>
+                <ul class="list-disc ml-5 text-sm space-y-1">
+                    ${q.options.map(opt => `
+                        <li class="${opt === q.correctAnswer ? 'text-green-600 font-semibold' : 'text-gray-600'}">
+                            ${opt} ${opt === q.correctAnswer ? ' (Correct Answer)' : ''}
+                        </li>
+                    `).join('')}
+                </ul>
+            </div>
+        `).join('<div class="h-4"></div>');
+
+        app.innerHTML = `
+            <div class="w-full max-w-4xl mx-auto p-4 md:p-8 space-y-8">
+                <h2 class="text-3xl font-bold text-gray-800 border-b pb-4 text-amber-600">Manage Questions</h2>
+                
+                <div class="flex justify-between items-center">
+                    <p class="text-gray-600">Total Questions: ${state.questions.length}</p>
+                    <button onclick="toggleAddQuestionForm()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg text-sm transition">
+                        Add New Question
+                    </button>
+                </div>
+
+                <!-- Add Question Form -->
+                <div id="add-question-form-container" class="bg-indigo-50 p-6 rounded-xl shadow-inner hidden">
+                    <h4 class="text-xl font-bold text-indigo-700 mb-4">Add a New MCQ Question</h4>
+                    <form id="add-question-form" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Question Text</label>
+                            <textarea id="new-q-text" rows="2" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div><label class="block text-sm font-medium text-gray-700 mb-1">Option 1</label><input type="text" id="new-q-opt1" required class="w-full px-3 py-2 border rounded-lg"></div>
+                            <div><label class="block text-sm font-medium text-gray-700 mb-1">Option 2</label><input type="text" id="new-q-opt2" required class="w-full px-3 py-2 border rounded-lg"></div>
+                            <div><label class="block text-sm font-medium text-gray-700 mb-1">Option 3</label><input type="text" id="new-q-opt3" required class="w-full px-3 py-2 border rounded-lg"></div>
+                            <div><label class="block text-sm font-medium text-gray-700 mb-1">Option 4</label><input type="text" id="new-q-opt4" required class="w-full px-3 py-2 border rounded-lg"></div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Correct Answer (Must match one option)</label>
+                            <input type="text" id="new-q-correct" required class="w-full px-3 py-2 border border-green-500 rounded-lg focus:ring-green-500 focus:border-green-500" placeholder="e.g., Option 1 text">
+                        </div>
+                        <button type="submit" class="w-full btn-primary text-white font-semibold py-3 rounded-lg">Save Question</button>
+                    </form>
+                </div>
+
+                <!-- Existing Questions List -->
+                <div class="space-y-4">
+                    ${state.questions.length > 0 ? questionsHtml : '<div class="text-center py-8 text-gray-500 bg-white rounded-xl shadow-lg">No questions available. Add some!</div>'}
+                </div>
+
+                <div class="text-center mt-6">
+                    <button onclick="router('admin_panel')" class="bg-amber-500 hover:bg-amber-600 text-white font-semibold py-2 px-6 rounded-lg transition">
+                        Back to Admin Dashboard
+                    </button>
+                </div>
+            </div>
+        `;
+
+        document.getElementById('add-question-form').addEventListener('submit', handleAddQuestion);
+    }
+
+    function toggleAddQuestionForm() {
+        document.getElementById('add-question-form-container').classList.toggle('hidden');
+    }
+
+    function handleAddQuestion(e) {
+        e.preventDefault();
+        const question = document.getElementById('new-q-text').value.trim();
+        const options = [
+            document.getElementById('new-q-opt1').value.trim(),
+            document.getElementById('new-q-opt2').value.trim(),
+            document.getElementById('new-q-opt3').value.trim(),
+            document.getElementById('new-q-opt4').value.trim(),
+        ];
+        const correctAnswer = document.getElementById('new-q-correct').value.trim();
+
+        if (!options.includes(correctAnswer)) {
+            return showAlert("Validation Error", "The correct answer must exactly match one of the four provided options.");
+        }
+
+        const newId = state.questions.length > 0 ? Math.max(...state.questions.map(q => q.id)) + 1 : 1;
+        
+        state.questions.push({
+            id: newId,
+            question: question,
+            options: options,
+            correctAnswer: correctAnswer,
+            type: "mcq"
+        });
+
+        saveQuestions();
+        renderAdminQuestions();
+        document.getElementById('add-question-form').reset();
+        showAlert("Success", "Question added successfully!");
+    }
+
+    function deleteQuestion(id) {
+        // Use custom modal for confirmation (replacing confirm())
+        const confirmTitle = 'Confirm Deletion';
+        const confirmMessage = 'Are you sure you want to delete this question? This will affect all past results data.';
+        
+        showAlert(confirmTitle, confirmMessage);
+        
+        const modalButton = document.getElementById('global-modal').querySelector('button');
+        modalButton.textContent = 'Confirm Delete';
+        modalButton.classList.add('bg-red-500', 'hover:bg-red-600');
+        modalButton.classList.remove('btn-primary');
+        
+        modalButton.onclick = () => {
+            document.getElementById('global-modal').classList.add('hidden');
+            
+            state.questions = state.questions.filter(q => q.id !== id);
+            saveQuestions();
+            renderAdminQuestions();
+            
+            // Restore button classes
+            modalButton.classList.remove('bg-red-500', 'hover:bg-red-600');
+            modalButton.classList.add('btn-primary');
+            modalButton.textContent = 'I Understand';
+            modalButton.onclick = () => document.getElementById('global-modal').classList.add('hidden');
+        };
+    }
+
+
+    // =========================================================================
+    // 7. INITIALIZATION
+    // =========================================================================
+
+    // Load data and start the application
+    window.onload = function() {
+        loadData();
+        router('home');
+    };
+
+</script>
+</body>
+</html>
